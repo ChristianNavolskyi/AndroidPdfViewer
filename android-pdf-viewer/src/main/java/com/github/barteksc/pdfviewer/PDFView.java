@@ -49,6 +49,7 @@ import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
 import com.github.barteksc.pdfviewer.listener.OnPageScrollListener;
 import com.github.barteksc.pdfviewer.listener.OnRenderListener;
 import com.github.barteksc.pdfviewer.listener.OnTapListener;
+import com.github.barteksc.pdfviewer.listener.OnZoomChangeListener;
 import com.github.barteksc.pdfviewer.model.PagePart;
 import com.github.barteksc.pdfviewer.scroll.ScrollHandle;
 import com.github.barteksc.pdfviewer.source.AssetSource;
@@ -493,10 +494,10 @@ public class PDFView extends RelativeLayout {
         float relativeCenterPointInStripXOffset;
         float relativeCenterPointInStripYOffset;
 
-        if (swipeVertical){
+        if (swipeVertical) {
             relativeCenterPointInStripXOffset = centerPointInStripXOffset / pdfFile.getMaxPageWidth();
             relativeCenterPointInStripYOffset = centerPointInStripYOffset / pdfFile.getDocLen(zoom);
-        }else {
+         }else {
             relativeCenterPointInStripXOffset = centerPointInStripXOffset / pdfFile.getDocLen(zoom);
             relativeCenterPointInStripYOffset = centerPointInStripYOffset / pdfFile.getMaxPageHeight();
         }
@@ -506,12 +507,12 @@ public class PDFView extends RelativeLayout {
 
         if (swipeVertical) {
             currentXOffset = -relativeCenterPointInStripXOffset * pdfFile.getMaxPageWidth() + w * 0.5f;
-            currentYOffset = -relativeCenterPointInStripYOffset * pdfFile.getDocLen(zoom) + h * 0.5f ;
-        }else {
+            currentYOffset = -relativeCenterPointInStripYOffset * pdfFile.getDocLen(zoom) + h * 0.5f;
+        } else {
             currentXOffset = -relativeCenterPointInStripXOffset * pdfFile.getDocLen(zoom) + w * 0.5f;
             currentYOffset = -relativeCenterPointInStripYOffset * pdfFile.getMaxPageHeight() + h * 0.5f;
         }
-        moveTo(currentXOffset,currentYOffset);
+        moveTo(currentXOffset, currentYOffset);
         loadPageByOffset();
     }
 
@@ -524,17 +525,16 @@ public class PDFView extends RelativeLayout {
         if (swipeVertical) {
             if (direction < 0 && currentXOffset < 0) {
                 return true;
-            } else if (direction > 0 && currentXOffset + toCurrentScale(pdfFile.getMaxPageWidth()) > getWidth()) {
-                return true;
+            } else {
+                return direction > 0 && currentXOffset + toCurrentScale(pdfFile.getMaxPageWidth()) > getWidth();
             }
         } else {
             if (direction < 0 && currentXOffset < 0) {
                 return true;
-            } else if (direction > 0 && currentXOffset + pdfFile.getDocLen(zoom) > getWidth()) {
-                return true;
+            } else {
+                return direction > 0 && currentXOffset + pdfFile.getDocLen(zoom) > getWidth();
             }
         }
-        return false;
     }
 
     @Override
@@ -546,17 +546,16 @@ public class PDFView extends RelativeLayout {
         if (swipeVertical) {
             if (direction < 0 && currentYOffset < 0) {
                 return true;
-            } else if (direction > 0 && currentYOffset + pdfFile.getDocLen(zoom) > getHeight()) {
-                return true;
+            } else {
+                return direction > 0 && currentYOffset + pdfFile.getDocLen(zoom) > getHeight();
             }
         } else {
             if (direction < 0 && currentYOffset < 0) {
                 return true;
-            } else if (direction > 0 && currentYOffset + toCurrentScale(pdfFile.getMaxPageHeight()) > getHeight()) {
-                return true;
+            } else {
+                return direction > 0 && currentYOffset + toCurrentScale(pdfFile.getMaxPageHeight()) > getHeight();
             }
         }
-        return false;
     }
 
     @Override
@@ -1028,6 +1027,7 @@ public class PDFView extends RelativeLayout {
      */
     public void zoomTo(float zoom) {
         this.zoom = zoom;
+        this.callbacks.callOnZoomChange(this.zoom);
     }
 
     /**
@@ -1349,6 +1349,8 @@ public class PDFView extends RelativeLayout {
 
         private OnPageErrorListener onPageErrorListener;
 
+        private OnZoomChangeListener onZoomChangeListener;
+
         private LinkHandler linkHandler = new DefaultLinkHandler(PDFView.this);
 
         private int defaultPage = 0;
@@ -1451,6 +1453,11 @@ public class PDFView extends RelativeLayout {
             return this;
         }
 
+        public Configurator onZoom(OnZoomChangeListener onZoomChangeListener) {
+            this.onZoomChangeListener = onZoomChangeListener;
+            return this;
+        }
+
         public Configurator linkHandler(LinkHandler linkHandler) {
             this.linkHandler = linkHandler;
             return this;
@@ -1537,6 +1544,7 @@ public class PDFView extends RelativeLayout {
             PDFView.this.callbacks.setOnTap(onTapListener);
             PDFView.this.callbacks.setOnLongPress(onLongPressListener);
             PDFView.this.callbacks.setOnPageError(onPageErrorListener);
+            PDFView.this.callbacks.setOnZoomChange(onZoomChangeListener);
             PDFView.this.callbacks.setLinkHandler(linkHandler);
             PDFView.this.setSwipeEnabled(enableSwipe);
             PDFView.this.setNightMode(nightMode);
