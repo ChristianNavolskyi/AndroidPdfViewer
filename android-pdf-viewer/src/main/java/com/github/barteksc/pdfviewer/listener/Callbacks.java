@@ -75,6 +75,11 @@ public class Callbacks {
 	private OnZoomChangeListener onZoomChangeListener;
 
 	/**
+	 * Call back object to call when the pdf size changed by zooming in or out
+	 */
+	private OnSizeChangeListener onSizeChangeListener;
+
+	/**
 	 * Call back object to call when clicking link
 	 */
 	private LinkHandler linkHandler;
@@ -180,6 +185,16 @@ public class Callbacks {
 	public void callOnZoomChange(float zoom) {
 		if (onZoomChangeListener != null) {
 			onZoomChangeListener.onZoomChanged(zoom);
+		}
+	}
+
+	public void setOnSizeChange(OnSizeChangeListener onSizeChangeListener) {
+		this.onSizeChangeListener = onSizeChangeListener;
+	}
+
+	public void callOnSizeChange(float width, float height) {
+		if (onSizeChangeListener != null) {
+			onSizeChangeListener.onSizeChanged(width, height);
 		}
 	}
 
